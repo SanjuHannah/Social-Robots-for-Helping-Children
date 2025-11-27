@@ -1,0 +1,36 @@
+<launch>
+  <!-- Start RealSense -->
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+
+  <!-- Args you can override on the command line -->
+  <arg name="input_device" default="25"/>
+  <arg name="rate"         default="16000"/>
+  <arg name="model_dir"    default="/home/qtrobot/models/vosk-en-small"/>
+  <arg name="camera_topic" default="/camera/color/image_raw"/>
+  <arg name="ollama_model" default="qwen3:1.7b"/>
+
+  <!-- ASR node -->
+  <node pkg="qt_storytelling"
+        type="qt_asr_vosk_node.py"
+        name="qt_asr_vosk"
+        output="screen"
+        respawn="true"
+        respawn_delay="1.0">
+    <param name="input_device" value="$(arg input_device)"/>
+    <param name="rate"         value="$(arg rate)"/>
+    <param name="model_dir"    value="$(arg model_dir)"/>
+  </node>
+
+  <!-- Orchestrator node -->
+  <node pkg="qt_storytelling"
+        type="qt_voice_story_orchestrator.py"
+        name="qt_story_orchestrator"
+        output="screen"
+        respawn="true"
+        respawn_delay="1.0">
+    <param name="camera_topic" value="$(arg camera_topic)"/>
+    <param name="ollama_model" value="$(arg ollama_model)"/>
+  </node>
+</launch>
+
+

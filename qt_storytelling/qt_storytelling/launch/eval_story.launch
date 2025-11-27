@@ -1,0 +1,38 @@
+<launch>
+  <!-- Start RealSense camera -->
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+
+  <!-- ASR / mic / model settings (same as your old launch, adjust if needed) -->
+  <arg name="input_device" default="25"/>
+  <arg name="rate"         default="16000"/>
+  <arg name="model_dir"    default="/home/qtrobot/models/vosk-en-small"/>
+  <arg name="camera_topic" default="/camera/color/image_raw"/>
+
+  <!-- Use the small evaluation model by default -->
+  <arg name="ollama_model" default="qwen3:1.7b"/>
+
+  <!-- ASR node: we can reuse the SAME qt_asr_vosk_node.py -->
+  <!-- Give it a slightly different name so it doesn't clash with your normal setup -->
+  <node pkg="qt_storytelling"
+        type="qt_asr_vosk_node.py"
+        name="qt_asr_vosk_eval"
+        output="screen"
+        respawn="true"
+        respawn_delay="1.0">
+    <param name="input_device" value="$(arg input_device)"/>
+    <param name="rate"         value="$(arg rate)"/>
+    <param name="model_dir"    value="$(arg model_dir)"/>
+  </node>
+
+  <!-- Evaluation storyteller node (your new script) -->
+  <node pkg="qt_storytelling"
+        type="qt_story_evaluation.py"
+        name="qt_story_evaluation"
+        output="screen"
+        respawn="true"
+        respawn_delay="1.0">
+    <param name="camera_topic" value="$(arg camera_topic)"/>
+    <param name="ollama_model" value="$(arg ollama_model)"/>
+  </node>
+</launch>
+

@@ -1,0 +1,41 @@
+<launch>
+  <!--
+    CLICKER STORY MODE (no ASR, includes RealSense camera)
+
+    Starts:
+      - RealSense camera (rs_camera.launch)
+      - qt_clicker_listener.py
+      - qt_clicker_story_orchestrator.py
+  -->
+
+  <!-- Start RealSense camera -->
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+
+  <!-- Clicker listener -->
+  <node pkg="qt_storytelling"
+        type="qt_clicker_listener.py"
+        name="qt_clicker_listener"
+        output="screen"
+        respawn="true"
+        respawn_delay="1.0">
+
+    <!-- your clicker dongle event device -->
+    <param name="device_path" value="/dev/input/by-id/usb-MOUSE_USB_MOUSE-event-kbd"/>
+  </node>
+
+  <!-- Clicker-based storyteller -->
+  <node pkg="qt_storytelling"
+        type="qt_clicker_story_orchestrator.py"
+        name="qt_clicker_story_orchestrator"
+        output="screen"
+        respawn="true"
+        respawn_delay="1.0">
+
+    <!-- RGB topic coming from RealSense -->
+    <param name="camera_topic" value="/camera/color/image_raw"/>
+
+    <!-- Your Ollama model -->
+    <param name="ollama_model" value="qwen3:1.7b"/>
+  </node>
+</launch>
+
